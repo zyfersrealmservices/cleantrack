@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log in — CleanTrack</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header class="topbar" id="topbar"></header>
+
+  <main class="container" style="max-width:460px">
+    <div class="card">
+      <h1 style="margin-top:0" id="formTitle">Log in</h1>
+
+      <form id="loginForm">
+        <label for="email">Email</label>
+        <input id="email" type="email" required autocomplete="username">
+        <label for="password">Password</label>
+        <input id="password" type="password" required autocomplete="current-password">
+        <div style="margin-top:16px"><button class="btn" type="submit">Log in</button></div>
+        <p class="hint">New resident? <a href="#" id="showRegister">Create an account</a></p>
+      </form>
+
+      <form id="registerForm" class="hidden">
+        <label for="rName">Full name</label>
+        <input id="rName" required maxlength="60">
+        <label for="rEmail">Email</label>
+        <input id="rEmail" type="email" required maxlength="100" autocomplete="email">
+        <label for="rArea">Your area</label>
+        <select id="rArea"></select>
+        <label for="rPassword">Password (at least 8 characters)</label>
+        <input id="rPassword" type="password" required minlength="8" maxlength="128" autocomplete="new-password">
+        <div style="margin-top:16px"><button class="btn" type="submit">Create account</button></div>
+        <p class="hint">Already have an account? <a href="#" id="showLogin">Log in</a></p>
+      </form>
+
+      <div id="message"></div>
+
+      <div class="demo-box">
+        <b>Demo resident accounts</b> <span class="sim-label">SAMPLE DATA</span><br>
+        Click to fill in the form:<br>
+        <button class="btn ghost small" data-email="riya@cleantrack.test" data-pass="resident123">Resident: Riya</button>
+        <button class="btn ghost small" data-email="arjun@cleantrack.test" data-pass="resident123">Resident: Arjun</button>
+      </div>
+    </div>
+  </main>
+
+  <script src="/js/common.js"></script>
+  <script src="/js/login.js"></script>
+</body>
+</html>

@@ -1,0 +1,750 @@
+/* style.css — one stylesheet for every page.
+   Dark theme: deep green-black background, light text, bright green accent.
+   All colours live in the variables below, so changing them here changes the whole site. */
+
+:root {
+  color-scheme: dark;              /* tells the browser to draw dark dropdowns, scrollbars, date pickers */
+  --bg: #08110d;                   /* page background */
+  --surface: #0f1c16;              /* cards */
+  --surface-2: #152620;            /* inputs, hovered rows */
+  --line: #223a2f;                 /* borders */
+  --ink: #e9f3ee;                  /* main text */
+  --muted: #9bb3a6;                /* secondary text */
+  --green: #3fd88a;                /* main accent */
+  --green-dark: #2bb571;
+  --green-soft: rgba(63, 216, 138, 0.12);
+  --amber: #f4b74a;
+  --amber-soft: rgba(244, 183, 74, 0.14);
+  --blue: #6fb0ff;
+  --blue-soft: rgba(111, 176, 255, 0.14);
+  --red: #ff7b7b;
+  --red-soft: rgba(255, 123, 123, 0.14);
+  --radius: 14px;
+  --shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+  line-height: 1.55;
+}
+
+a { color: var(--green); }
+img { max-width: 100%; }
+h1, h2, h3 { font-family: "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif; letter-spacing: -0.01em; }
+
+/* ----- Top bar ----- */
+.topbar {
+  background: rgba(8, 17, 13, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+.topbar .inner {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.brand {
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--ink);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.brand .logo {
+  width: 32px; height: 32px; border-radius: 9px;
+  background: var(--green); color: #05230f;
+  display: grid; place-items: center; font-size: 1.05rem; font-weight: 800;
+}
+.topbar nav { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+.topbar .who { color: var(--muted); font-size: 0.9rem; }
+
+.container { max-width: 1160px; margin: 0 auto; padding: 28px 24px 64px; }
+
+/* ----- Buttons and forms ----- */
+.btn {
+  display: inline-block;
+  border: 1px solid var(--green);
+  background: var(--green);
+  color: #05230f;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease,
+              translate 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);   /* magnetic pull, with a little spring */
+}
+.btn { position: relative; overflow: hidden; }
+/* the ripple circle added by common.js when a button is pressed */
+.ripple {
+  position: absolute; border-radius: 50%; pointer-events: none;
+  background: currentColor; opacity: 0.25; transform: scale(0);
+  animation: ripple 0.6s ease-out forwards;
+}
+@keyframes ripple { to { transform: scale(1); opacity: 0; } }
+/* the little arrow inside "Report a problem" slides right on hover */
+.btn .arrow { display: inline-block; margin-left: 6px; transition: transform 0.2s ease; }
+.btn:hover .arrow { transform: translateX(4px); }
+.btn:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(63, 216, 138, 0.25); }
+.btn:active { transform: translateY(1px); box-shadow: none; }
+.btn.ghost { background: rgba(255, 255, 255, 0.03); color: var(--ink); border-color: rgba(255, 255, 255, 0.16); }
+.btn.ghost:hover { border-color: var(--green); box-shadow: none; }
+.btn.small { padding: 6px 12px; font-size: 0.85rem; }
+.btn.big { padding: 14px 24px; font-size: 1.05rem; }
+.btn:disabled { opacity: 0.6; cursor: wait; }
+.btn:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible, [tabindex]:focus-visible {
+  outline: 3px solid rgba(63, 216, 138, 0.6); outline-offset: 2px;
+}
+
+label { display: block; font-weight: 600; font-size: 0.9rem; margin: 12px 0 4px; }
+input, select, textarea {
+  width: 100%;
+  font: inherit;
+  color: var(--ink);
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-2);
+}
+input::placeholder, textarea::placeholder { color: #6f8a7c; }
+input[type="file"] { padding: 8px; }
+textarea { min-height: 90px; resize: vertical; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+/* on narrow phones the two dropdowns stack, so long names are not cut off */
+@media (max-width: 520px) { .row { grid-template-columns: 1fr; gap: 0; } }
+.custom-box { animation: enter-soft 0.2s ease; }
+@keyframes enter-soft { from { opacity: 0; } }
+.hint { color: var(--muted); font-size: 0.85rem; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 22px;
+}
+
+.msg { padding: 10px 12px; border-radius: 10px; margin-top: 12px; font-size: 0.92rem; }
+.msg.error { background: var(--red-soft); color: var(--red); }
+.msg.ok { background: var(--green-soft); color: var(--green); }
+.hidden { display: none !important; }
+
+/* ----- Tables ----- */
+table { width: 100%; border-collapse: collapse; font-size: 0.93rem; }
+th, td { text-align: left; padding: 11px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--muted); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; }
+tr.clickable { cursor: pointer; transition: background 0.15s; }
+tr.clickable:hover { background: rgba(63, 216, 138, 0.07); }
+
+.bar { height: 8px; background: var(--surface-2); border-radius: 4px; overflow: hidden; min-width: 80px; }
+.bar span { display: block; height: 100%; background: var(--green); border-radius: 4px; transition: width 1s ease; }
+
+/* ----- Status badges ----- */
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.badge.Submitted { background: var(--blue-soft); color: var(--blue); }
+.badge.In-Progress { background: var(--amber-soft); color: var(--amber); }
+.badge.Resolved { background: var(--green-soft); color: var(--green); }
+.badge.Rejected { background: var(--red-soft); color: var(--red); }
+
+/* ----- Stat cards (home + admin) ----- */
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.stat { padding: 20px; }
+.stat .num { font-size: 2.4rem; font-weight: 800; line-height: 1.1; }
+.stat .label { color: var(--muted); font-size: 0.9rem; }
+
+h2.section { margin: 40px 0 14px; font-size: 1.4rem; }
+
+/* ----- Dashboards ----- */
+.dash { display: grid; grid-template-columns: 420px 1fr; gap: 22px; align-items: start; }
+.filters { display: grid; grid-template-columns: 1fr 1fr 1fr 1.4fr; gap: 10px; margin-bottom: 14px; }
+.filters select, .filters input { padding: 8px 10px; }
+
+.complaint-list { display: grid; gap: 12px; }
+.complaint {
+  display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: start;
+  padding: 16px; cursor: pointer; transition: border-color 0.15s, transform 0.15s;
+}
+.complaint:hover { border-color: rgba(63, 216, 138, 0.5); }
+.complaint .icon { font-size: 1.6rem; }
+.complaint h3 { margin: 0 0 2px; font-size: 1rem; }
+.complaint .meta { color: var(--muted); font-size: 0.85rem; }
+
+/* Progress tracker: Submitted -> In Progress -> Resolved */
+.tracker { display: flex; gap: 6px; margin: 14px 0; }
+.tracker div {
+  flex: 1; text-align: center; font-size: 0.78rem; font-weight: 700;
+  padding: 7px 4px; border-radius: 8px; background: var(--surface-2); color: var(--muted);
+  transition: background 0.4s, color 0.4s;
+}
+.tracker div.done { background: var(--green); color: #05230f; }
+
+
+/* Pop-up details panel */
+.modal-bg {
+  position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: grid; place-items: center; padding: 20px; z-index: 50;
+}
+.modal { width: min(640px, 100%); max-height: 90vh; overflow: auto; position: relative; }
+.modal .close { position: absolute; top: 12px; right: 12px; }
+.modal img.photo { border-radius: 10px; border: 1px solid var(--line); margin-top: 10px; max-height: 260px; }
+
+.sim-label {
+  display: inline-block; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.04em;
+  background: var(--amber-soft); color: var(--amber); padding: 2px 8px; border-radius: 6px;
+}
+
+.demo-box { background: var(--green-soft); border-radius: 10px; padding: 12px; font-size: 0.88rem; margin-top: 16px; }
+.demo-box button { margin: 4px 4px 0 0; }
+
+footer { text-align: center; color: var(--muted); font-size: 0.85rem; padding: 28px; border-top: 1px solid var(--line); }
+
+/* =====================================================================
+   HOME PAGE
+   ===================================================================== */
+
+/* "Reveal" animation: elements with data-reveal start slightly lower and see-through.
+   home.js adds the class "in" when they scroll into view, and they slide into place. */
+[data-reveal] { opacity: 0; transform: translateY(28px); transition: opacity 0.7s ease, transform 0.7s ease; }
+[data-reveal].in { opacity: 1; transform: none; }
+[data-reveal-delay="1"] { transition-delay: 0.1s; }
+[data-reveal-delay="2"] { transition-delay: 0.2s; }
+[data-reveal-delay="3"] { transition-delay: 0.3s; }
+
+/* ----- 1. Hero ----- */
+.home-hero {
+  position: relative;
+  min-height: 100vh;
+  padding-top: 58px;   /* the logo and Log in sit in this space (no bar) */
+  display: grid;
+  align-items: center;
+  overflow: hidden;
+  background: transparent;   /* the one fixed forest behind the page shows through */
+}
+/* A dark shade on the left of the hero so the big heading is easy to read.
+   It fades out at the bottom edge, so there is no visible line where the hero ends. */
+.home-hero::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(90deg, rgba(8, 17, 13, 0.8) 0%, rgba(8, 17, 13, 0.5) 40%, transparent 70%);
+  -webkit-mask-image: linear-gradient(180deg, #000 60%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 60%, transparent 100%);
+}
+.home-hero .wrap { position: relative; z-index: 1; }
+.home-hero .wrap {
+  max-width: 1160px; margin: 0 auto; padding: 40px 24px; width: 100%;
+  display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 48px; align-items: center;
+}
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 0.82rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--green); background: var(--green-soft); padding: 6px 12px; border-radius: 999px;
+}
+.eyebrow .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(63, 216, 138, 0.6); } 70% { box-shadow: 0 0 0 10px rgba(63, 216, 138, 0); } 100% { box-shadow: 0 0 0 0 rgba(63, 216, 138, 0); } }
+
+.home-hero h1 { font-size: clamp(2.4rem, 5.4vw, 4.4rem); line-height: 1.04; margin: 18px 0 18px; }
+.home-hero h1 .accent { color: var(--green); }
+.home-hero .lead { font-size: 1.15rem; color: var(--muted); max-width: 34rem; margin: 0 0 28px; }
+.home-hero .actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.hero-facts { display: flex; gap: 28px; margin-top: 34px; color: var(--muted); font-size: 0.92rem; }
+.hero-facts b { display: block; color: var(--ink); font-size: 1.6rem; }
+
+/* Hero entrance: plays once when the page loads */
+.enter { opacity: 0; transform: translateY(18px); animation: enter 0.8s ease forwards; }
+.enter.d1 { animation-delay: 0.1s; } .enter.d2 { animation-delay: 0.2s; }
+.enter.d3 { animation-delay: 0.3s; } .enter.d4 { animation-delay: 0.45s; }
+@keyframes enter { to { opacity: 1; transform: none; } }
+
+/* The complaint card on the right of the hero.
+   You can click its status buttons (home.js). */
+.hero-visual { position: relative; height: 520px; }
+.float-card {
+  position: absolute; background: var(--surface); border: 1px solid var(--line);
+  border-radius: 18px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5); padding: 18px;
+}
+.float-card.main {
+  top: 0; right: 0; width: 330px;
+  background: rgba(15, 28, 22, 0.82); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+}
+.float-card h4 { margin: 6px 0 4px; font-size: 1.05rem; }
+.float-card .small { font-size: 0.82rem; color: var(--muted); }
+/* ----- The interactive example card in the hero -----
+   data-status on the card: 0 = Submitted, 1 = In Progress, 2 = Resolved.
+   CSS shows the matching badge, colours the steps and stamps "Cleaned" at 2. */
+.demo-card { transition: box-shadow 0.25s ease, border-color 0.25s ease; }
+.demo-card:hover { border-color: rgba(63, 216, 138, 0.45); }
+.demo-top { display: flex; align-items: center; gap: 6px; }
+.try-label {
+  margin-left: auto; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--green); background: var(--green-soft); padding: 2px 8px; border-radius: 999px;
+}
+.demo-photo { position: relative; margin: 12px 0; border-radius: 12px; overflow: hidden; aspect-ratio: 16 / 9; background: var(--surface-2); }
+.demo-photo img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.5s ease, filter 0.6s ease; }
+.demo-card:hover .demo-photo img { transform: scale(1.04); }
+.photo-status { position: absolute; left: 10px; top: 10px; z-index: 2; }
+.photo-status .badge { display: none; backdrop-filter: blur(6px); background-color: rgba(8, 17, 13, 0.7); }
+.demo-card[data-status="0"] .photo-status .Submitted,
+.demo-card[data-status="1"] .photo-status .In-Progress,
+.demo-card[data-status="2"] .photo-status .Resolved { display: inline-block; }
+.cleaned-stamp {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  font-size: 1.6rem; font-weight: 800; color: #fff; letter-spacing: 0.02em;
+  background: rgba(31, 122, 77, 0.55); opacity: 0; transform: scale(1.15);
+  transition: opacity 0.4s ease, transform 0.4s ease; pointer-events: none;
+}
+.demo-card[data-status="2"] .cleaned-stamp { opacity: 1; transform: none; }
+.demo-card[data-status="2"] .demo-photo img { filter: saturate(0.4) brightness(0.8); }
+
+.demo-steps button {
+  flex: 1; font: inherit; font-size: 0.78rem; font-weight: 700; cursor: pointer;
+  padding: 7px 4px; border-radius: 8px; border: 1px solid transparent;
+  background: var(--surface-2); color: var(--muted);
+  transition: background 0.3s, color 0.3s, transform 0.15s, border-color 0.2s;
+  position: relative; overflow: hidden;
+}
+.demo-steps button:hover { border-color: var(--green); color: var(--ink); }
+.demo-steps button:active { transform: translateY(1px); }
+.demo-steps button.done { background: var(--green); color: #05230f; }
+.demo-steps button[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--green); }
+.demo-line { min-height: 1.4em; }
+
+/* ----- 2. How it works (the steps follow a video) ----- */
+/* home.js sets data-step 0 → 3 on the section as the video plays. */
+.story { position: relative; }
+.story .sticky {
+  min-height: calc(100vh - 58px); padding: 80px 0;
+  display: grid; align-items: center;
+}
+.story .wrap {
+  max-width: 1160px; margin: 0 auto; padding: 0 24px; width: 100%;
+  display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 48px; align-items: center;
+}
+.story h2 { font-size: clamp(1.8rem, 3.4vw, 2.6rem); margin: 0 0 8px; line-height: 1.1; }
+.story-hint { color: var(--muted); margin: 0 0 22px; }
+
+.steps-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+/* each step is a real button, so it works with mouse, touch and keyboard */
+.step-btn {
+  width: 100%; text-align: left; font: inherit; color: inherit; cursor: pointer;
+  display: grid; grid-template-columns: 40px 1fr; gap: 14px; align-items: start;
+  padding: 14px; border-radius: 14px; border: 1px solid transparent; background: transparent;
+  opacity: 0.6; position: relative; overflow: hidden;
+  transition: opacity 150ms ease, background-color 150ms ease, border-color 150ms ease;
+}
+.step-btn:hover { opacity: 1; background-color: rgba(63, 216, 138, 0.06); }      /* hover highlight */
+.step-btn[aria-pressed="true"] { opacity: 1; background: var(--surface); border-color: var(--line); }
+.step-btn .n {
+  width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center;
+  font-weight: 800; background: var(--surface-2); color: var(--muted); transition: background 0.3s, color 0.3s;
+}
+.step-btn .txt b { display: block; font-size: 1.05rem; }
+.step-btn .txt span { color: var(--muted); font-size: 0.93rem; }
+/* steps already reached get a green number */
+.story[data-step="0"] li:nth-child(1) .n, .story[data-step="1"] li:nth-child(-n+2) .n,
+.story[data-step="2"] li:nth-child(-n+3) .n, .story[data-step="3"] li .n { background: var(--green); color: #05230f; }
+
+.story-stage { position: relative; }
+.scene-box { position: relative; }
+.scene {
+  width: 100%; height: auto; aspect-ratio: 5 / 3; display: block; border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.12); background: #0c1a14;
+}
+.video-toggle {
+  position: absolute; right: 12px; top: 12px; width: 44px; height: 44px; border-radius: 50%;
+  display: grid; place-items: center; cursor: pointer; font-size: 0.85rem; color: #fff;
+  background: rgba(8, 17, 13, 0.6); border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+.video-toggle:hover { background: rgba(8, 17, 13, 0.85); border-color: var(--green); }
+.video-toggle:focus-visible { outline: 3px solid rgba(63, 216, 138, 0.6); outline-offset: 2px; }
+.video-toggle[hidden] { display: none; }
+/* the thin line at the bottom of the active step: how much of that step has played */
+.step-btn::after {
+  content: ""; position: absolute; left: 0; bottom: 0; width: 100%; height: 3px; background: var(--green);
+  transform: scaleX(var(--sp, 0)); transform-origin: left; opacity: 0; transition: opacity 0.3s ease;
+}
+.step-btn[aria-pressed="true"]::after { opacity: 1; }
+
+.story-card {
+  position: relative; margin: 18px 0 0 auto; width: min(380px, 100%);
+  background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55); padding: 16px;
+}
+.story-card h4 { margin: 4px 0 2px; }
+.story-card .small { font-size: 0.82rem; color: var(--muted); }
+.story-card .tracker { margin: 10px 0 8px; }
+.story-card .status-line { font-size: 0.85rem; color: var(--muted); min-height: 1.4em; }
+/* Only the badge that matches the current step is shown */
+.story-card .badge { display: none; }
+.story[data-step="0"] .badge.Submitted, .story[data-step="1"] .badge.Submitted,
+.story[data-step="2"] .badge.In-Progress, .story[data-step="3"] .badge.Resolved { display: inline-block; }
+.story-card .tracker div:nth-child(2), .story-card .tracker div:nth-child(3) { background: var(--surface-2); color: var(--muted); }
+.story[data-step="2"] .story-card .tracker div:nth-child(2),
+.story[data-step="3"] .story-card .tracker div:nth-child(2),
+.story[data-step="3"] .story-card .tracker div:nth-child(3) { background: var(--green); color: #05230f; }
+
+/* ----- 3. Live numbers ----- */
+.home-section { padding: 110px 0; }
+.home-section .wrap { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+.home-section h2 { font-size: clamp(1.8rem, 3.4vw, 2.6rem); margin: 0 0 10px; line-height: 1.1; }
+.home-section .sub { color: var(--muted); margin: 0 0 34px; max-width: 40rem; }
+.numbers-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 22px; align-items: start; }
+.numbers-grid .stats { grid-template-columns: 1fr 1fr; }
+
+/* ----- 4. Tips ----- */
+.tips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.tip:hover { border-color: rgba(63, 216, 138, 0.5); }
+.tip h3 { margin: 10px 0 6px; font-size: 1.08rem; }
+.tip p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+.tip .icon {
+  width: 46px; height: 46px; border-radius: 12px; display: grid; place-items: center; font-size: 1.4rem;
+  background: var(--surface-2);
+}
+
+/* ----- 5. Closing call to action ----- */
+.cta { text-align: center; padding: 130px 24px; }
+.cta h2 { font-size: clamp(2rem, 4.6vw, 3.6rem); margin: 0 0 14px; line-height: 1.05; }
+.cta p { color: var(--muted); margin: 0 0 28px; }
+
+/* =====================================================================
+   HOVER EFFECTS (used on every page)
+   ===================================================================== */
+
+/* 1. Hover highlight ("state layer", the idea comes from Google's Material Design).
+   An invisible layer sits on top of the button. On hover it fades to a pale tint
+   of the button's own text colour in 150 ms, so every button gets a matching highlight. */
+.btn::before, .demo-steps button::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit;
+  background: currentColor; opacity: 0; transition: opacity 150ms ease; pointer-events: none;
+}
+.btn:not(.ghost)::before { background: #fff; }   /* green buttons get paler, not darker */
+.btn:hover::before, .demo-steps button:hover::before { opacity: 0.1; }
+.btn:not(.ghost):hover::before { opacity: 0.2; }
+.btn:active::before, .demo-steps button:active::before { opacity: 0.16; }   /* a bit stronger while pressed */
+/* plain text links get a soft green tint behind them */
+main a:not(.btn) { border-radius: 4px; padding: 0 2px; margin: 0 -2px; transition: background-color 150ms ease; }
+main a:not(.btn):hover { background-color: rgba(63, 216, 138, 0.14); }
+/* clickable table rows (admin dashboard) */
+tr.clickable { transition: background-color 150ms ease; }
+
+/* 2. Hover lift: the card rises 4 px while its shadow grows from small and tight to big and soft.
+   We use the separate "translate" property so it adds to any movement a card already has. */
+.complaint, .tip, .stat, .demo-card, .story-card, .inbox-row, .profile-card {
+  box-shadow: var(--glass-edge), 0 1px 2px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: translate 200ms ease, box-shadow 200ms ease, border-color 200ms ease, transform 400ms ease;
+}
+.complaint:hover, .tip:hover, .stat:hover, .demo-card:hover, .story-card:hover, .inbox-row:hover, .profile-card:hover {
+  translate: 0 -4px;
+  box-shadow: var(--glass-edge), 0 14px 28px rgba(0, 0, 0, 0.45), 0 30px 60px rgba(0, 0, 0, 0.3);
+}
+
+/* 3. Cursor spotlight: a soft circle of light follows the mouse inside a dark card,
+   and the 1 px border closest to the mouse lights up green.
+   common.js writes the mouse position into --x and --y on the card. */
+.card, .story-card { position: relative; }
+.card::before, .float-card::before, .story-card::before,
+.card::after, .float-card::after, .story-card::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit;
+  pointer-events: none; opacity: 0; transition: opacity 300ms ease;
+}
+/* the soft light inside the card */
+.card::before, .float-card::before, .story-card::before {
+  background: radial-gradient(280px circle at var(--x, 50%) var(--y, 50%), rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.03) 40%, transparent 70%);
+}
+/* the glowing border: a green circle, masked so only a 1 px ring at the edge shows */
+.card::after, .float-card::after, .story-card::after {
+  padding: 1px;
+  background: radial-gradient(180px circle at var(--x, 50%) var(--y, 50%), rgba(63, 216, 138, 0.9), transparent 70%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+.card:hover::before, .float-card:hover::before, .story-card:hover::before,
+.card:hover::after, .float-card:hover::after, .story-card:hover::after { opacity: 1; }
+
+/* Phones have no mouse, so no lift or spotlight there (a tap would leave it "stuck" on) */
+@media (hover: none) {
+  .complaint:hover, .tip:hover, .stat:hover, .demo-card:hover, .story-card:hover { translate: none; }
+  .card:hover::before, .float-card:hover::before, .story-card:hover::before,
+  .card:hover::after, .float-card:hover::after, .story-card:hover::after { opacity: 0; }
+}
+
+/* =====================================================================
+   HOME PAGE TOP: no header bar. The logo, name and Log in sit on the page itself
+   (over the hero) and scroll away with it.
+   ===================================================================== */
+.topbar--home {
+  position: absolute; left: 0; right: 0; top: 0;
+  background: transparent; border-bottom: 0;
+  backdrop-filter: none; -webkit-backdrop-filter: none;
+}
+
+/* =====================================================================
+   ACCOUNT MENU (round avatar at the right end of the top bar)
+   ===================================================================== */
+.account { position: relative; }   /* the menu is positioned against this box */
+.avatar-btn {
+  width: 32px; height: 32px; border-radius: 50%; padding: 0; cursor: pointer;
+  border: 1px solid rgba(63, 216, 138, 0.5); background: var(--green-soft); color: var(--green);
+  font: inherit; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.02em;
+  display: grid; place-items: center; position: relative; overflow: hidden;
+  transition: box-shadow 150ms ease, background-color 150ms ease;
+}
+.avatar-btn:hover { background-color: rgba(63, 216, 138, 0.22); }
+.avatar-btn[aria-expanded="true"] { box-shadow: 0 0 0 3px rgba(63, 216, 138, 0.35); }
+.account-menu {
+  position: absolute; top: calc(100% + 8px); right: 0;   /* right edge flush with the avatar's */
+  min-width: 230px; padding: 6px; z-index: 60;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+}
+.account-menu[hidden] { display: none; }
+.menu-label { padding: 8px 10px 10px; display: grid; gap: 2px; }
+.menu-label b { font-size: 0.95rem; }
+.menu-label span { color: var(--muted); font-size: 0.82rem; word-break: break-all; }
+.account-menu [role="menuitem"] {
+  display: block; width: 100%; text-align: left; font: inherit; font-size: 0.92rem;
+  color: var(--ink); text-decoration: none; background: transparent; border: 0;
+  padding: 9px 10px; margin: 0; border-radius: 8px; cursor: pointer;
+  transition: background-color 150ms ease;
+}
+.account-menu [role="menuitem"]:hover, .account-menu [role="menuitem"]:focus-visible {
+  background-color: rgba(63, 216, 138, 0.12); outline: none;
+}
+.account-menu #signOutItem { color: var(--red); }
+.account-menu #signOutItem:hover, .account-menu #signOutItem:focus-visible { background-color: var(--red-soft); }
+.menu-sep { height: 1px; background: var(--line); margin: 6px 4px; }
+
+/* =====================================================================
+   VERTICAL TIMELINE (complaint history)
+   3 columns: time | dot + line | what happened
+   ===================================================================== */
+.tl { list-style: none; margin: 8px 0 0; padding: 0; }
+.tl-item { display: grid; grid-template-columns: 112px 22px 1fr; gap: 0 12px; }
+.tl-opposite { text-align: right; padding-top: 1px; }
+.tl-opposite time { color: var(--muted); font-size: 0.8rem; white-space: nowrap; }
+.tl-separator { display: flex; flex-direction: column; align-items: center; }
+.tl-dot {
+  width: 14px; height: 14px; border-radius: 50%; margin-top: 4px; flex: none;
+  background: var(--green); box-shadow: 0 0 0 3px var(--surface);   /* solid dot = finished */
+}
+.tl-dot.tl-Submitted { background: var(--blue); }
+.tl-dot.tl-In-Progress { background: var(--amber); }
+.tl-dot.tl-Rejected { background: var(--red); }
+.tl-connector { flex: 1; width: 2px; background: var(--line); margin: 4px 0; min-height: 18px; }
+.tl-item:last-child .tl-connector { display: none; }   /* the line stops at the last dot */
+.tl-content { padding-bottom: 18px; }
+.tl-title { font-weight: 700; font-size: 0.95rem; }
+.tl-detail { color: var(--muted); font-size: 0.88rem; }
+.tl-now {
+  font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--amber); background: var(--amber-soft); padding: 1px 6px; border-radius: 999px; margin-left: 4px;
+}
+/* the event still in progress: a spinning ring instead of a solid dot */
+.tl-item.is-loading .tl-dot {
+  background: transparent; border: 2px solid var(--line); border-top-color: var(--green);
+  animation: tl-spin 0.9s linear infinite;
+}
+@keyframes tl-spin { to { transform: rotate(360deg); } }
+
+/* =====================================================================
+   DASHBOARD SCREENS + BOTTOM TAB BAR
+   ===================================================================== */
+.screen-title { margin: 0 0 18px; font-size: clamp(1.6rem, 3vw, 2.1rem); }
+.screen.narrow { max-width: 640px; margin: 0 auto; }
+.profile-box { display: grid; gap: 16px; }
+.profile-card { display: flex; gap: 18px; align-items: center; }
+.avatar-big {
+  width: 64px; height: 64px; border-radius: 50%; flex: none; display: grid; place-items: center;
+  background: var(--green-soft); color: var(--green); font-size: 1.4rem; font-weight: 800;
+  border: 1px solid rgba(63, 216, 138, 0.5);
+}
+/* owner's Users screen */
+.badge.role-owner { background: var(--amber-soft); color: var(--amber); }
+.badge.role-admin { background: var(--green-soft); color: var(--green); }
+.badge.role-resident { background: var(--blue-soft); color: var(--blue); }
+.badge.off { background: var(--red-soft); color: var(--red); }
+.user-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+@media (max-width: 700px) { /* phones: one account per block, so the buttons are always visible */
+  [data-view="users"] thead { display: none; }
+  #usersTable tr { display: grid; grid-template-columns: 1fr auto; gap: 6px 10px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+  #usersTable td { border: 0; padding: 0; }
+  #usersTable td:nth-child(3) { display: none; }                  /* number of reports */
+  #usersTable td:nth-child(4) { grid-column: 1; }
+  #usersTable td:nth-child(5) { grid-column: 1 / -1; }
+  .user-actions .btn { min-height: 44px; }
+}
+.inbox-list { display: grid; gap: 10px; }
+.inbox-row {
+  width: 100%; text-align: left; font: inherit; color: inherit; cursor: pointer;
+  display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center; padding: 14px 16px;
+}
+.inbox-row.is-new { border-color: rgba(63, 216, 138, 0.45); }
+.inbox-icon { font-size: 1.4rem; }
+.inbox-text { display: grid; min-width: 0; }
+.inbox-text b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.inbox-text span { color: var(--muted); font-size: 0.86rem; }
+.inbox-row time { color: var(--muted); font-size: 0.8rem; white-space: nowrap; }
+
+/* room at the bottom of the page so the tab bar never covers content */
+body.has-tabbar main { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
+.tabbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+  background: rgba(10, 20, 15, 0.92); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border-top: 1px solid var(--line);
+  padding-bottom: env(safe-area-inset-bottom);   /* clears the iPhone home indicator */
+}
+.tabbar-inner { max-width: 560px; margin: 0 auto; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; }
+.tabbar a {
+  display: grid; justify-items: center; gap: 3px; padding: 8px 4px 9px; min-height: 56px;
+  color: var(--muted); text-decoration: none; font-size: 0.72rem; font-weight: 600;
+  border-radius: 0; margin: 0; transition: color 150ms ease;
+}
+.tabbar a:hover { color: var(--ink); background: transparent; }
+.tabbar a[aria-current="page"] { color: var(--green); }   /* the selected tab is tinted */
+.tab-icon { position: relative; display: grid; place-items: center; width: 52px; height: 28px; border-radius: 14px; transition: background-color 150ms ease; }
+.tabbar a:hover .tab-icon { background: rgba(255, 255, 255, 0.06); }
+.tabbar a[aria-current="page"] .tab-icon { background: var(--green-soft); }
+.tab-badge {
+  position: absolute; top: -4px; left: 30px; min-width: 18px; height: 18px; padding: 0 5px;
+  border-radius: 9px; background: var(--red); color: #fff; font-size: 0.68rem; font-weight: 800;
+  display: grid; place-items: center; line-height: 1; box-shadow: 0 0 0 2px var(--bg);
+}
+.tab-badge[hidden] { display: none; }
+
+/* =====================================================================
+   FOREST BACKGROUND ON THE OTHER PAGES (login, resident, admin)
+   Fixed behind everything (z-index -1). A dark layer on top keeps forms readable.
+   ===================================================================== */
+.page-forest {
+  position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  /* shown until the 3D forest has loaded (and if it never can) */
+  background:
+    radial-gradient(60% 60% at 75% 40%, rgba(63, 216, 138, 0.12), transparent 70%),
+    radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px) 0 0 / 26px 26px,
+    var(--bg);
+}
+.page-forest iframe { width: 100%; height: 100%; border: 0; display: block; opacity: 0; transition: opacity 1.6s ease; }
+.page-forest.ready iframe { opacity: 1; }
+.page-forest::after {
+  content: ""; position: absolute; inset: 0;
+  background:
+    linear-gradient(180deg, rgba(8, 17, 13, 0.82) 0%, rgba(8, 17, 13, 0.55) 45%, rgba(8, 17, 13, 0.75) 100%),
+    radial-gradient(80% 70% at 50% 40%, transparent 40%, rgba(8, 17, 13, 0.6) 100%);
+}
+
+/* Home page: a lighter dark layer, so the forest is clearly visible all the way down.
+   Section text gets a soft shadow so it stays readable over bright moss. */
+.home .page-forest::after {
+  background:
+    linear-gradient(180deg, rgba(8, 17, 13, 0.25) 0%, rgba(8, 17, 13, 0.45) 100%),
+    radial-gradient(90% 80% at 50% 45%, transparent 45%, rgba(8, 17, 13, 0.55) 100%);
+}
+.home main h2, .home main .sub, .home .story-hint, .home .cta p, .home .home-hero .lead {
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.7);
+}
+.home footer { border-top: 0; background: transparent; }
+
+/* =====================================================================
+   3D GLASS CARDS
+   See-through "frosted glass": a dark tint you can see through, a blur of whatever
+   is behind (the forest), a thin bright line along the top edge and a dark one at
+   the bottom, like light catching the edge of a glass pane.
+   ===================================================================== */
+:root {
+  --glass-bg: linear-gradient(160deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02) 60%), rgba(10, 22, 16, 0.55);
+  --glass-edge: inset 0 1px 0 rgba(255, 255, 255, 0.10), inset 0 -1px 0 rgba(0, 0, 0, 0.30);
+}
+.card, .float-card, .float-card.main, .story-card {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  backdrop-filter: blur(16px) saturate(150%);
+  border-color: rgba(255, 255, 255, 0.10);
+}
+.card:not(.complaint):not(.tip):not(.stat):not(.inbox-row):not(.profile-card) { box-shadow: var(--glass-edge), 0 10px 30px rgba(0, 0, 0, 0.35); }
+.float-card.main { box-shadow: var(--glass-edge), 0 24px 60px rgba(0, 0, 0, 0.5); }
+/* the pop-up stays more solid so long text is easy to read */
+.modal.card { background: linear-gradient(160deg, rgba(255, 255, 255, 0.06), transparent 60%), rgba(10, 22, 16, 0.92); }
+
+/* TILT: common.js turns these cards toward the mouse with transform (perspective +
+   rotateX/rotateY). While the mouse moves the change is quick; when it leaves, the
+   card eases back flat. */
+.is-tilting { transition: translate 200ms ease, box-shadow 200ms ease, border-color 200ms ease, transform 120ms ease-out !important; will-change: transform; }
+
+/* =====================================================================
+   FLOATING ORBS (soft blurred colour that drifts behind the content)
+   They sit above the forest and below everything else.
+   ===================================================================== */
+.orbs { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+.orb { position: absolute; border-radius: 50%; filter: blur(90px); mix-blend-mode: screen; will-change: transform; }
+.orb-1 { width: 560px; height: 560px; top: -160px; left: -140px; background: radial-gradient(circle, rgba(63, 216, 138, 0.30), transparent 70%); animation: orbDrift1 22s ease-in-out infinite; }
+.orb-2 { width: 480px; height: 480px; top: 30%; right: -120px; background: radial-gradient(circle, rgba(45, 180, 190, 0.24), transparent 70%); animation: orbDrift2 27s ease-in-out infinite; }
+.orb-3 { width: 420px; height: 420px; bottom: -120px; left: 30%; background: radial-gradient(circle, rgba(140, 220, 120, 0.18), transparent 70%); animation: orbDrift3 31s ease-in-out infinite; }
+.orb-4 { width: 340px; height: 340px; top: 55%; left: -80px; background: radial-gradient(circle, rgba(63, 216, 138, 0.20), transparent 70%); animation: orbDrift4 24s ease-in-out infinite; }
+@keyframes orbDrift1 { 0%, 100% { transform: translate(0, 0) scale(1); } 25% { transform: translate(90px, 60px) scale(1.08); } 50% { transform: translate(40px, 150px) scale(0.95); } 75% { transform: translate(130px, 70px) scale(1.04); } }
+@keyframes orbDrift2 { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(-90px, -110px) scale(1.1); } 66% { transform: translate(-40px, 70px) scale(0.93); } }
+@keyframes orbDrift3 { 0%, 100% { transform: translate(0, 0) scale(1); } 40% { transform: translate(70px, -90px) scale(1.06); } 80% { transform: translate(-50px, -40px) scale(0.95); } }
+@keyframes orbDrift4 { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(110px, -70px) scale(1.1); } }
+/* orbs drift by themselves, so they stay still for people who turned off animations */
+@media (prefers-reduced-motion: reduce) { .orb { animation: none; } }
+
+/* ----- Phones and small screens ----- */
+@media (max-width: 900px) {
+  .dash, .numbers-grid { grid-template-columns: 1fr; }
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .tips { grid-template-columns: 1fr; }
+  .filters { grid-template-columns: 1fr 1fr; }
+  .home-hero .wrap { grid-template-columns: 1fr; gap: 24px; padding-top: 32px; }
+  .hero-visual { height: auto; }
+  .demo-steps button { min-height: 44px; }   /* big enough to tap with a thumb */
+  .tl-item { grid-template-columns: 70px 18px 1fr; gap: 0 10px; }   /* narrower time column on phones */
+  .tl-opposite time { white-space: normal; font-size: 0.75rem; }
+  .inbox-row { grid-template-columns: auto 1fr; }            /* phones: date goes under the text */
+  .inbox-row time { grid-column: 2; margin-top: -8px; }
+  .inbox-text b { white-space: normal; }
+  .float-card.main { position: relative; top: auto; left: auto; right: auto; width: auto; transform: none; }
+  .home-hero::before { background: rgba(8, 17, 13, 0.55); }
+  .story .wrap { grid-template-columns: 1fr; gap: 16px; }
+  .story h2 { margin-bottom: 12px; }
+  .story .sticky { padding: 56px 0; }
+  .step-btn { padding: 10px; }
+  .step-btn .txt span { display: none; }   /* phones: titles only, so the page does not jump when the step changes */
+  .story-card { width: auto; margin: 14px 0 0; padding: 12px; }
+  .home-section { padding: 70px 0; }
+}
+
+/* People who turn off animations in their system settings get no movement at all */
+/* People who turned off "Animation effects" in Windows (or "Reduce motion" on a phone) get a calmer page:
+   nothing slides, drifts or plays by itself, but buttons and cards still answer the mouse with quick
+   colour changes, so the page never feels dead. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .enter, .eyebrow .dot { animation: none; opacity: 1; transform: none; }
+  [data-reveal] { transform: none; transition: opacity 0.4s ease; }   /* a gentle fade instead of a slide */
+  .float-card { transform: none !important; }
+  .demo-card:hover .demo-photo img { transform: none; }
+}

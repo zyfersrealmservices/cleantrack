@@ -1,0 +1,17 @@
+{
+  "name": "cleantrack",
+  "version": "1.0.0",
+  "description": "CleanTrack - report and track waste problems in your area (CodesClash 2026, Problem 01)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "reset": "node scripts/reset.js",
+    "set-passwords": "node scripts/set-passwords.js",
+    "test": "node scripts/security-test.mjs"
+  },
+  "engines": {
+    "node": ">=22.23.5"
+  },
+  "license": "MIT",
+  "private": true
+}

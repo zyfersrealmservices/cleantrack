@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- viewport-fit=cover lets the tab bar use env(safe-area-inset-bottom) on iPhones -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Admin dashboard — CleanTrack</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header class="topbar" id="topbar"></header>
+
+  <main class="container">
+    <!-- Screen 1: Overview -->
+    <section data-view="overview" class="screen" hidden>
+      <h1 class="screen-title">Overview</h1>
+      <div class="stats" id="stats"></div>
+      <h2 class="section">Area-wise summary</h2>
+      <div class="card">
+        <table>
+          <thead><tr><th>Area</th><th>Total</th><th>Open</th><th>Resolved</th></tr></thead>
+          <tbody id="areaTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Screen 2: All complaints with filters -->
+    <section data-view="complaints" class="screen" hidden>
+      <h1 class="screen-title">All complaints</h1>
+      <div class="card">
+        <div class="filters">
+          <select id="fStatus" aria-label="Filter by status"><option value="">All statuses</option></select>
+          <select id="fArea" aria-label="Filter by area"><option value="">All areas</option></select>
+          <select id="fCategory" aria-label="Filter by category"><option value="">All categories</option></select>
+          <input id="fSearch" type="search" placeholder="Search title or location" aria-label="Search">
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th>#</th><th>Issue</th><th>Area</th><th>Reported by</th><th>Team</th><th>Status</th><th>Date</th></tr></thead>
+            <tbody id="table"></tbody>
+          </table>
+        </div>
+        <p class="hint" id="count"></p>
+      </div>
+    </section>
+
+    <!-- Screen 3: Inbox = new reports waiting for review -->
+    <section data-view="inbox" class="screen narrow" hidden>
+      <h1 class="screen-title">Inbox</h1>
+      <p class="hint" style="margin-top:-8px">New reports waiting for review. Open one to assign a team.</p>
+      <div class="inbox-list" id="inboxList"></div>
+    </section>
+
+    <!-- Owner only: accounts. admin.js removes this for other admins, and the server refuses them anyway. -->
+    <section data-view="users" class="screen" hidden>
+      <h1 class="screen-title">Accounts</h1>
+      <p class="hint" style="margin-top:-8px">Only the owner sees this screen.</p>
+      <div class="card">
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th>Account</th><th>Role</th><th>Reports</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="usersTable"></tbody>
+          </table>
+        </div>
+        <div id="usersMsg"></div>
+      </div>
+    </section>
+
+    <!-- Screen 4: Profile + Settings -->
+    <section data-view="profile" class="screen narrow" hidden>
+      <h1 class="screen-title">Profile</h1>
+      <div id="profileBox" class="profile-box"></div>
+    </section>
+  </main>
+
+  <script src="/js/common.js"></script>
+  <script src="/js/admin.js"></script>
+</body>
+</html>

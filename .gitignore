@@ -1,0 +1,20 @@
+# The database and uploaded photos are created when the app runs.
+# They must NOT go to GitHub (they hold user data and password hashes).
+data/
+
+# Secrets (we have none, but just in case)
+.env
+.env.*
+*.pem
+*.key
+
+# Any database file, wherever it is
+*.db
+*.db-*
+*.sqlite
+
+# Dependencies and system junk
+node_modules/
+.DS_Store
+Thumbs.db
+*.log

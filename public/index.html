@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CleanTrack — Report waste problems in your area</title>
+  <meta name="description" content="Residents report overflowing bins, litter and dumping. The collection team assigns a team and marks it resolved. Track every report from Submitted to Resolved.">
+  <meta name="theme-color" content="#08110d">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="home">
+  <header class="topbar topbar--home" id="topbar"></header>
+
+  <main>
+    <!-- ===== 1. HERO: the first screen ===== -->
+    <section class="home-hero" id="hero">
+      <div class="wrap">
+        <div>
+          <span class="eyebrow enter"><span class="dot"></span> Waste reporting for your neighbourhood</span>
+          <h1 class="enter d1">Spot it. Report it.<br><span class="accent">See it cleaned.</span></h1>
+          <p class="lead enter d2">Overflowing bins, litter and illegal dumping go straight to the
+             city's collection team. You follow every report from Submitted to Resolved.</p>
+          <div class="actions enter d3">
+            <a class="btn big" href="/login.html">Report a problem <span class="arrow" aria-hidden="true">→</span></a>
+            <a class="btn ghost big" href="#story">See how it works</a>
+          </div>
+          <div class="hero-facts enter d4">
+            <div><b id="factTotal">–</b>reports so far</div>
+            <div><b id="factResolved">–</b>resolved</div>
+            <div><b>1 min</b>to report</div>
+          </div>
+        </div>
+
+        <!-- Example complaint card you can play with. home.js changes data-status 0 → 1 → 2
+             by itself every few seconds, and the status buttons let visitors pick one. -->
+        <div class="hero-visual enter d2">
+          <article class="float-card main demo-card" id="demoCard" data-status="0" aria-label="Example complaint you can try">
+            <div class="small demo-top">Complaint #12 · 🗑️ Overflowing bin <span class="try-label">Try it</span></div>
+            <h4>Bin overflowing near park gate</h4>
+            <div class="demo-photo">
+              <img src="/img/overflowing-bin.webp" width="887" height="500"
+                   alt="An overflowing black wheelie bin in a park, with plastic bottles and wrappers spilling onto the grass">
+              <span class="photo-status">
+                <span class="badge Submitted">Submitted</span>
+                <span class="badge In-Progress">In Progress</span>
+                <span class="badge Resolved">Resolved</span>
+              </span>
+              <span class="cleaned-stamp">✓ Cleaned</span>
+            </div>
+            <div class="tracker demo-steps" role="group" aria-label="Change the example status">
+              <button type="button" data-set="0" aria-pressed="true">Submitted</button>
+              <button type="button" data-set="1" aria-pressed="false">In Progress</button>
+              <button type="button" data-set="2" aria-pressed="false">Resolved</button>
+            </div>
+            <div class="small demo-line" id="demoLine" aria-live="polite">📍 Sector 12 · Waiting for the admin to review</div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 2. HOW IT WORKS: a 20-second looping video. Every 5 seconds is one step;
+         home.js reads the video time and lights up the matching step and card. ===== -->
+    <section class="story" id="story" data-step="0">
+      <div class="sticky">
+        <div class="wrap">
+          <div>
+            <h2>One report, from street to solved</h2>
+            <p class="story-hint">An animated example of how one report gets solved.</p>
+            <ol class="steps-list">
+              <li><button type="button" class="step-btn" data-step="0" aria-pressed="true"><span class="n">1</span><span class="txt"><b>Resident reports</b><span>Pick a category and area, add a landmark and a photo if you have one.</span></span></button></li>
+              <li><button type="button" class="step-btn" data-step="1" aria-pressed="false"><span class="n">2</span><span class="txt"><b>Admin reviews</b><span>The new report appears on the admin dashboard, filtered by area.</span></span></button></li>
+              <li><button type="button" class="step-btn" data-step="2" aria-pressed="false"><span class="n">3</span><span class="txt"><b>Team assigned</b><span>The admin sends a collection team and the status turns In Progress.</span></span></button></li>
+              <li><button type="button" class="step-btn" data-step="3" aria-pressed="false"><span class="n">4</span><span class="txt"><b>Resolved</b><span>The area is cleaned and the resident sees the full history.</span></span></button></li>
+            </ol>
+          </div>
+
+          <div class="story-stage">
+            <div class="scene-box">
+              <video class="scene" id="storyVideo" src="/video/story.mp4" poster="/video/story-poster.jpg"
+                     width="1200" height="720" muted loop playsinline preload="metadata"
+                     aria-label="Animation: a resident photographs an overflowing bin, an admin reviews the report, Team Alpha's truck collects the rubbish and the street is clean at sunrise"></video>
+              <button type="button" class="video-toggle" id="videoToggle" aria-label="Play animation">▶</button>
+            </div>
+
+            <div class="story-card">
+              <div class="small">Complaint #24 · 🗑️ Overflowing bin · Sector 12</div>
+              <h4>Bin overflowing near park gate</h4>
+              <span class="badge Submitted">Submitted</span>
+              <span class="badge In-Progress">In Progress</span>
+              <span class="badge Resolved">Resolved</span>
+              <div class="tracker"><div class="done">Submitted</div><div>In Progress</div><div>Resolved</div></div>
+              <div class="status-line" id="storyLine">Riya reported it with a photo.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 3. LIVE NUMBERS from the database ===== -->
+    <section class="home-section" id="numbers">
+      <div class="wrap">
+        <h2 data-reveal>Live numbers from every area</h2>
+        <p class="sub" data-reveal data-reveal-delay="1">These counts come straight from the database, so they change the moment a resident reports or an admin resolves something. All areas and reports are sample data for this prototype.</p>
+        <div class="numbers-grid">
+          <div class="stats" id="stats" data-reveal data-reveal-delay="1"></div>
+          <div class="card" data-reveal data-reveal-delay="2">
+            <table>
+              <thead><tr><th>Area</th><th>Open</th><th>Resolved</th><th>Resolved %</th></tr></thead>
+              <tbody id="areaTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 4. SEGREGATION TIPS ===== -->
+    <section class="home-section" id="tips">
+      <div class="wrap">
+        <h2 data-reveal>Sort it before you throw it</h2>
+        <p class="sub" data-reveal data-reveal-delay="1">Most overflowing bins start at home. Six habits that keep your street clean.</p>
+        <div class="tips">
+          <div class="card tip" data-reveal><div class="icon">🟢</div><h3>Green bin: wet waste</h3>
+            <p>Vegetable peels, leftover food, tea leaves and flowers. These can become compost.</p></div>
+          <div class="card tip" data-reveal data-reveal-delay="1"><div class="icon">🔵</div><h3>Blue bin: dry waste</h3>
+            <p>Paper, cardboard, clean plastic, glass and metal cans. Rinse and dry them first.</p></div>
+          <div class="card tip" data-reveal data-reveal-delay="2"><div class="icon">🔴</div><h3>Hazardous: keep apart</h3>
+            <p>Batteries, medicines, sanitary waste and broken bulbs. Wrap them and keep them separate.</p></div>
+          <div class="card tip" data-reveal><div class="icon">🔌</div><h3>E-waste goes back</h3>
+            <p>Old phones, chargers and wires go to an authorised e-waste point, never the regular bin.</p></div>
+          <div class="card tip" data-reveal data-reveal-delay="1"><div class="icon">🛍️</div><h3>Carry a cloth bag</h3>
+            <p>Less single-use plastic means fewer blocked drains after the monsoon.</p></div>
+          <div class="card tip" data-reveal data-reveal-delay="2"><div class="icon">🔥</div><h3>Never burn garbage</h3>
+            <p>Burning waste releases toxic smoke. Report open burning so the team can act.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 5. CLOSING CALL TO ACTION ===== -->
+    <section class="cta">
+      <h2 data-reveal>Seen a full bin today?</h2>
+      <p data-reveal data-reveal-delay="1">It takes one minute. The collection team sees it right away.</p>
+      <a class="btn big" href="/login.html" data-reveal data-reveal-delay="2">Report a problem <span class="arrow" aria-hidden="true">→</span></a>
+    </section>
+  </main>
+
+  <footer>CleanTrack · CodesClash 2026 prototype · Problem 01: Waste Management System · Sample data only</footer>
+
+  <script src="/js/common.js"></script>
+  <script src="/js/home.js"></script>
+</body>
+</html>

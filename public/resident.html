@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- viewport-fit=cover lets the tab bar use env(safe-area-inset-bottom) on iPhones -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>My reports — CleanTrack</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header class="topbar" id="topbar"></header>
+
+  <main class="container">
+    <!-- Screen 1: Report a problem -->
+    <section data-view="report" class="screen narrow" hidden>
+      <h1 class="screen-title">Report a waste problem</h1>
+      <form class="card" id="reportForm">
+        <label for="title">Short title</label>
+        <input id="title" required maxlength="100" placeholder="e.g. Bin overflowing near school">
+
+        <div class="row">
+          <div>
+            <label for="category">Category</label>
+            <select id="category" required></select>
+            <div class="custom-box" id="customCategoryBox" hidden>
+              <label for="customCategory">Your category</label>
+              <input id="customCategory" maxlength="40" placeholder="e.g. Dead animal">
+            </div>
+          </div>
+          <div>
+            <label for="area">Area</label>
+            <select id="area" required></select>
+            <div class="custom-box" id="customAreaBox" hidden>
+              <label for="customArea">Your area</label>
+              <input id="customArea" maxlength="40" placeholder="e.g. Sector 21">
+            </div>
+          </div>
+        </div>
+
+        <label for="location">Exact location / landmark</label>
+        <input id="location" required maxlength="150" placeholder="e.g. Opposite City Bank, Lane 3">
+
+        <label for="mapLink">Google Maps link (optional)</label>
+        <input id="mapLink" type="text" inputmode="url" maxlength="2000" autocomplete="off" aria-describedby="mapHelp" placeholder="https://maps.app.goo.gl/...">
+        <div class="hint" id="mapHelp" style="margin-top:4px">In Google Maps, tap the place, then Share, then Copy link, and paste it here.</div>
+
+        <label for="description">What is the problem?</label>
+        <textarea id="description" required maxlength="1000" placeholder="Describe what you see"></textarea>
+
+        <label for="photo">Photo (optional, max 2 MB)</label>
+        <input id="photo" type="file" accept="image/png,image/jpeg,image/webp">
+
+        <div style="margin-top:16px"><button class="btn" type="submit" id="submitBtn">Submit report</button></div>
+        <div id="formMsg"></div>
+      </form>
+    </section>
+
+    <!-- Screen 2: My reports -->
+    <section data-view="reports" class="screen" hidden>
+      <h1 class="screen-title">My reports</h1>
+      <div class="complaint-list" id="myList"></div>
+    </section>
+
+    <!-- Screen 3: Inbox (status updates from the collection team) -->
+    <section data-view="inbox" class="screen narrow" hidden>
+      <h1 class="screen-title">Inbox</h1>
+      <p class="hint" style="margin-top:-8px">Updates from the collection team on your reports. <span class="sim-label">SIMULATED</span> A real app would also send these by SMS or email.</p>
+      <div class="inbox-list" id="inboxList"></div>
+    </section>
+
+    <!-- Screen 4: Profile + Settings -->
+    <section data-view="profile" class="screen narrow" hidden>
+      <h1 class="screen-title">Profile</h1>
+      <div id="profileBox" class="profile-box"></div>
+    </section>
+  </main>
+
+  <script src="/js/common.js"></script>
+  <script src="/js/resident.js"></script>
+</body>
+</html>

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<!-- The "How it works" film. draw(t) paints the picture for second t (0 to 20).
+     render.mjs calls it 30 times per second of film and joins the pictures into a video.
+     Open this file in a browser to watch it without rendering. -->
+<meta charset="UTF-8">
+<style>body{margin:0;background:#08110d}canvas{display:block;width:100%;max-width:1200px;margin:auto}</style>
+<canvas id="c" width="1200" height="720"></canvas>
+<script>
+const W = 1200, H = 720, LENGTH = 20;
+const canvas = document.getElementById('c');
+let g = canvas.getContext('2d');
+const FONT = '"Segoe UI", Arial, sans-serif';
+
+// ---------- small helpers ----------
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const part = (t, a, b) => clamp((t - a) / (b - a));            // 0 before a, 1 after b
+const smooth = (k) => k * k * (3 - 2 * k);
+const out = (k) => 1 - Math.pow(1 - k, 3);                     // starts fast, settles gently
+const pop = (k) => k <= 0 ? 0 : k >= 1 ? 1 : 1 + 2.2 * Math.pow(k - 1, 3) + 1.2 * Math.pow(k - 1, 2);
+const mix = (a, b, k) => a + (b - a) * k;
+const rand = (n) => { const s = Math.sin(n * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); };
+function mixColor(a, b, k) {
+  const p = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+  const x = p(a), y = p(b);
+  return `rgb(${x.map((v, i) => Math.round(mix(v, y[i], k))).join(',')})`;
+}
+function box(x, y, w, h, r, fill, stroke, lw = 2) {
+  g.beginPath(); g.roundRect(x, y, w, h, r);
+  if (fill) { g.fillStyle = fill; g.fill(); }
+  if (stroke) { g.strokeStyle = stroke; g.lineWidth = lw; g.stroke(); }
+}
+function disc(x, y, r, fill) { g.beginPath(); g.arc(x, y, r, 0, 7); g.fillStyle = fill; g.fill(); }
+function label(s, x, y, size, color, weight = 600, align = 'left') {
+  g.font = `${weight} ${size}px ${FONT}`; g.fillStyle = color; g.textAlign = align; g.textBaseline = 'middle'; g.fillText(s, x, y);
+}
+function limb(x1, y1, x2, y2, w, color) {
+  g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.lineWidth = w; g.lineCap = 'round'; g.strokeStyle = color; g.stroke();
+}
+function shadow(x, y, w) { g.save(); g.translate(x, y); g.scale(1, 0.16); disc(0, 0, w, 'rgba(0,0,0,.28)'); g.restore(); }
+
+// ---------- sky, city, park ----------
+function backdrop(t, day) {
+  const sky = g.createLinearGradient(0, 0, 0, 520);
+  sky.addColorStop(0, mixColor('#0c2b33', '#4fa7b5', day));
+  sky.addColorStop(0.55, mixColor('#1d4a4a', '#a9d9c4', day));
+  sky.addColorStop(1, mixColor('#b9795a', '#ffe1a6', day));
+  g.fillStyle = sky; g.fillRect(0, 0, W, H);
+  for (let i = 0; i < 46; i++) {
+    const tw = 0.35 + 0.65 * Math.abs(Math.sin(t * (0.6 + rand(i)) + i * 2));
+    g.globalAlpha = tw * (1 - day) * 0.8;
+    disc(rand(i + 5) * W, rand(i + 90) * 250, 1 + rand(i + 33) * 1.4, '#eafff6');
+  }
+  g.globalAlpha = 1;
+  // the moon goes down, the sun comes up
+  const my = mix(120, 420, day), sy = mix(560, 250, day);
+  const glow = g.createRadialGradient(960, my, 10, 960, my, 130);
+  glow.addColorStop(0, `rgba(240,255,235,${0.45 * (1 - day)})`); glow.addColorStop(1, 'rgba(240,255,235,0)');
+  g.fillStyle = glow; g.fillRect(800, my - 160, 320, 320);
+  g.save(); g.globalAlpha = 1 - day; g.beginPath(); g.rect(0, 0, W, H); g.arc(942, my - 11, 37, 0, 7); g.clip('evenodd');   // cut a circle out of the moon
+  disc(960, my, 42, '#f2f7df'); g.restore();
+  const sun = g.createRadialGradient(300, sy, 10, 300, sy, 260);
+  sun.addColorStop(0, `rgba(255,236,170,${0.9 * day})`); sun.addColorStop(1, 'rgba(255,220,140,0)');
+  g.fillStyle = sun; g.fillRect(0, sy - 280, 620, 560);
+  g.globalAlpha = day; disc(300, sy, 46, '#fff3c4'); g.globalAlpha = 1;
+  // clouds
+  for (let i = 0; i < 4; i++) {
+    const x = ((rand(i + 3) * 1500 + t * (9 + i * 4)) % 1500) - 150, y = 90 + i * 48;
+    g.globalAlpha = mix(0.12, 0.6, day);
+    g.fillStyle = mixColor('#9cc4bd', '#ffffff', day);
+    g.beginPath(); g.ellipse(x, y, 74, 14, 0, 0, 7); g.ellipse(x - 28, y - 10, 34, 16, 0, 0, 7); g.ellipse(x + 22, y - 12, 40, 18, 0, 0, 7); g.fill();
+  }
+  g.globalAlpha = 1;
+  // far skyline
+  g.fillStyle = mixColor('#17403f', '#7fb9ab', day);
+  for (let i = 0; i < 15; i++) { const h = 90 + rand(i + 60) * 150; g.fillRect(i * 84 - 20, 470 - h, 66, h); }
+  // near buildings with windows
+  [[20, 190, 150], [186, 300, 130], [332, 230, 120], [760, 250, 140], [1066, 320, 150]].forEach(([x, h, w], b) => {
+    const top = 480 - h;
+    g.fillStyle = mixColor(['#0f302d', '#123833', '#0e2c2a', '#123631', '#0f302c'][b], ['#5d9a86', '#6aa793', '#558f7c', '#69a591', '#5d9a86'][b], day);
+    g.fillRect(x, top, w, h);
+    g.fillStyle = 'rgba(255,255,255,.06)'; g.fillRect(x, top, w, 7);
+    for (let r = 0; r < Math.floor(h / 48); r++) for (let k = 0; k < Math.floor(w / 42); k++) {
+      const n = b * 50 + r * 7 + k, lit = rand(n) > 0.45 && !(rand(n + 8) > 0.9 && Math.sin(t * 0.8 + n) > 0.6);
+      g.fillStyle = lit ? mixColor('#f7cf7a', '#d7efe2', day) : mixColor('#0a2422', '#7fb7a3', day);
+      g.globalAlpha = lit ? 0.9 : 0.6; g.fillRect(x + 15 + k * 42, top + 22 + r * 48, 22, 26);
+    }
+    g.globalAlpha = 1;
+  });
+  // hedge, fence and gate of the park
+  g.fillStyle = mixColor('#12402c', '#4d9a5b', day);
+  for (let i = 0; i < 26; i++) { g.beginPath(); g.arc(i * 50, 478 + rand(i) * 10, 34, 0, 7); g.fill(); }
+  g.fillRect(0, 478, W, 50);
+  for (let x = 0; x < W; x += 34) box(x, 440, 7, 88, 3, mixColor('#24564a', '#e9f5ec', day));
+  g.fillStyle = mixColor('#24564a', '#e9f5ec', day); g.fillRect(0, 456, W, 6); g.fillRect(0, 505, W, 6);
+  box(838, 372, 16, 158, 4, mixColor('#2f6b59', '#4a8f74', day)); box(1012, 372, 16, 158, 4, mixColor('#2f6b59', '#4a8f74', day));
+  box(826, 340, 214, 46, 10, mixColor('#1f5a45', '#2f8a5f', day)); label('CITY PARK', 933, 364, 25, '#eafff3', 800, 'center');
+  // trees
+  [[96, 1], [520, 0.82], [1140, 1.1]].forEach(([x, s], i) => {
+    const sway = Math.sin(t * 1.1 + i * 2) * 5 * s;
+    g.fillStyle = mixColor('#3b2b20', '#7a5a3e', day); g.fillRect(x - 8 * s, 400, 16 * s, 130);
+    [[0, 330, 62], [-36, 366, 46], [38, 362, 48], [4, 382, 50]].forEach(([dx, y, r], j) =>
+      disc(x + dx * s + sway * (1.3 - j * 0.2), y, r * s, mixColor(['#1d5a38', '#184e31', '#1b5535', '#226640'][j], ['#5fb866', '#52a85b', '#58b061', '#6cc472'][j], day)));
+  });
+  // pavement, kerb and road
+  g.fillStyle = mixColor('#39524c', '#c9d6cb', day); g.fillRect(0, 528, W, 62);
+  g.strokeStyle = 'rgba(0,0,0,.12)'; g.lineWidth = 2;
+  for (let x = -20; x < W; x += 92) { g.beginPath(); g.moveTo(x + 18, 528); g.lineTo(x, 590); g.stroke(); }
+  g.fillStyle = mixColor('#5d7a70', '#eef3ea', day); g.fillRect(0, 588, W, 12);
+  g.fillStyle = mixColor('#1c2b29', '#5d6d6a', day); g.fillRect(0, 600, W, 120);
+  for (let x = 20; x < W; x += 150) box(x, 662, 78, 8, 4, mixColor('#b79b57', '#fff1c2', day));
+}
+function lamp(x, day) {
+  const on = 1 - day;
+  const cone = g.createLinearGradient(0, 330, 0, 590);
+  cone.addColorStop(0, `rgba(255,224,150,${0.34 * on})`); cone.addColorStop(1, 'rgba(255,224,150,0)');
+  g.fillStyle = cone; g.beginPath(); g.moveTo(x + 48, 334); g.lineTo(x + 96, 334); g.lineTo(x + 200, 590); g.lineTo(x - 60, 590); g.fill();
+  limb(x, 586, x, 318, 9, '#0b1f1c'); limb(x, 318, x + 70, 318, 8, '#0b1f1c');
+  box(x + 44, 314, 56, 20, 8, '#0b1f1c'); box(x + 50, 328, 44, 9, 4, mixColor('#ffe6a4', '#d8e4dc', day));
+}
+
+// ---------- the bin and the rubbish ----------
+const BIN = { x: 610, y: 566 };
+const BAGS = [ // where each bag sits and when it is thrown into the truck (seconds)
+  { x: -24, y: -152, r: 30, c: '#4a5350', at: 15.1 }, { x: 24, y: -158, r: 33, c: '#3c4442', at: 15.4 }, { x: 2, y: -182, r: 25, c: '#59635f', at: 14.8 },
+  { x: -92, y: -22, r: 32, c: '#3c4442', at: 15.7 }, { x: -136, y: -14, r: 23, c: '#586260', at: 16.0 }, { x: 92, y: -22, r: 33, c: '#454d4b', at: 14.4 }, { x: 138, y: -14, r: 22, c: '#59635f', at: 16.3 },
+];
+const HOPPER = { x: 795, y: 478 };
+const FLIGHT = 0.6;
+function bag(x, y, r, c, spin = 0) {
+  g.save(); g.translate(x, y); g.rotate(spin);
+  g.beginPath(); g.ellipse(0, 0, r, r * 0.84, 0, 0, 7); g.fillStyle = c; g.fill();
+  g.beginPath(); g.ellipse(-r * 0.3, -r * 0.28, r * 0.34, r * 0.2, -0.5, 0, 7); g.fillStyle = 'rgba(255,255,255,.13)'; g.fill();
+  g.beginPath(); g.moveTo(-r * 0.24, -r * 0.72); g.lineTo(0, -r * 1.16); g.lineTo(r * 0.24, -r * 0.72); g.fillStyle = c; g.fill();
+  g.restore();
+}
+function litter(t) {
+  [[-176, 4, '#d9573f'], [-60, 12, '#63b1e8'], [58, 14, '#f0d9a4'], [176, 6, '#79c97f'], [-112, 16, '#e7e7dd'], [112, 16, '#d98fb0']].forEach(([x, y, c], i) => {
+    const k = 1 - part(t, 16.2 + i * 0.09, 16.6 + i * 0.09); if (k <= 0) return;
+    g.save(); g.globalAlpha *= k; g.translate(BIN.x + x, BIN.y + y - (1 - k) * 40); g.rotate(i * 1.3); box(-11, -6, 22, 12, 4, c); g.restore();
+  });
+}
+function bin(t) {
+  const full = 1 - part(t, 16, 16.8), x = BIN.x, y = BIN.y;
+  shadow(x, y + 2, 84);
+  // bags piled on top sit behind the front of the bin
+  BAGS.slice(0, 3).forEach((b) => { if (t < b.at) bag(x + b.x, y + b.y, b.r, b.c, Math.sin(t * 2 + b.x) * 0.02); });
+  const body = g.createLinearGradient(x - 60, 0, x + 60, 0);
+  body.addColorStop(0, '#2fa568'); body.addColorStop(0.55, '#278f59'); body.addColorStop(1, '#1b6f44');
+  g.fillStyle = body; g.beginPath(); g.moveTo(x - 60, y - 136); g.lineTo(x + 60, y - 136); g.lineTo(x + 49, y); g.lineTo(x - 49, y); g.closePath(); g.fill();
+  [-26, 0, 26].forEach((d) => limb(x + d, y - 118, x + d * 0.86, y - 16, 3, 'rgba(0,0,0,.10)'));
+  box(x - 68, y - 150, 136, 18, 7, '#1b6f44');
+  g.save(); g.translate(x - 62, y - 146); g.rotate(-1.15 * smooth(full)); box(-4, -13, 134, 15, 7, '#37b878'); g.restore();   // the lid
+  label('♻', x, y - 66, 54, '#e5fff1', 700, 'center');
+  disc(x - 36, y, 10, '#10221d'); disc(x + 36, y, 10, '#10221d');
+  BAGS.slice(3).forEach((b) => { if (t < b.at) { shadow(x + b.x, y + b.y + b.r * 0.8, b.r); bag(x + b.x, y + b.y, b.r, b.c); } });
+  litter(t);
+  if (full > 0) { // flies and smell lines
+    for (let i = 0; i < 7; i++) {
+      const a = t * (2.3 + i * 0.35) + i * 2; g.globalAlpha = full;
+      disc(x + Math.cos(a) * (46 + i * 7), y - 205 + Math.sin(a * 1.6) * 28, 3, '#0a1412');
+    }
+    g.lineWidth = 4; g.lineCap = 'round';
+    [-34, 6, 44].forEach((d, i) => {
+      const k = (t * 0.45 + i * 0.33) % 1; g.globalAlpha = full * Math.sin(k * Math.PI) * 0.55; g.strokeStyle = '#c6d36a'; g.beginPath();
+      for (let s = 0; s <= 10; s++) g[s ? 'lineTo' : 'moveTo'](x + d + Math.sin(s * 0.9 + t * 3) * 7, y - 208 - k * 46 - s * 5);
+      g.stroke();
+    });
+    g.globalAlpha = 1;
+  }
+}
+function flyingBags(t, truckX) {
+  BAGS.forEach((b, i) => {
+    const k = part(t, b.at, b.at + FLIGHT); if (k <= 0 || k >= 1) return;
+    const x = mix(BIN.x + b.x, HOPPER.x + truckX, k), y = mix(BIN.y + b.y, HOPPER.y, k) - Math.sin(k * Math.PI) * 110;
+    bag(x, y, b.r * mix(1, 0.72, k), b.c, k * 4 * (i % 2 ? 1 : -1));
+  });
+}
+
+// ---------- people ----------
+function person(x, y, o) {
+  const swing = Math.sin(o.walk * 9) * (o.walking ? 1 : 0), bob = o.walking ? Math.abs(Math.cos(o.walk * 9)) * 4 : Math.sin(o.walk * 2) * 1.2;
+  const d = o.dir || 1; shadow(x, y + 2, 40);
+  g.save(); g.translate(x, y - bob); g.scale(d, 1);
+  limb(0, -74, -swing * 24, -4, 17, o.legsBack); limb(-swing * 24 - 2, -4, -swing * 24 + 9, -4, 12, o.shoes);
+  limb(0, -74, swing * 24, -4, 17, o.legs); limb(swing * 24 - 2, -4, swing * 24 + 9, -4, 12, o.shoes);
+  if (o.arm < 0.5) limb(-4, -136, -10 - swing * 17, -86, 12, o.topBack); else limb(-4, -136, 30, -128, 12, o.topBack);
+  box(-23, -152, 46, 86, 20, o.top);
+  if (o.vest) { g.fillStyle = '#fff4b0'; g.fillRect(-23, -116, 46, 8); g.fillRect(-23, -95, 46, 8); }
+  box(-7, -168, 14, 22, 6, o.skin);
+  if (o.longHair) { g.fillStyle = o.hair; g.beginPath(); g.ellipse(-9, -166, 23, 36, 0.12, 0, 7); g.fill(); }
+  disc(2, -184, 24, o.skin);
+  g.fillStyle = o.hair; g.beginPath(); g.arc(1, -189, 25, Math.PI * 0.98, Math.PI * 2.02); g.fill();
+  if (o.cap) { box(-25, -212, 51, 22, 10, o.cap); box(14, -199, 29, 8, 4, o.cap); }
+  disc(13, -184, 3, '#17211f');
+  g.beginPath(); g.arc(12, -177, 6, 0.25, 1.9); g.strokeStyle = '#8d4b3b'; g.lineWidth = 2.5; g.stroke();
+  // front arm: hangs and swings, or lifts something up
+  const hx = mix(8 + swing * 17, 44, o.arm), hy = mix(-86, -146, o.arm);
+  limb(5, -136, hx, hy, 13, o.topFront); disc(hx, hy, 8, o.skin);
+  if (o.phone) { box(hx - 3, hy - 30, 17, 33, 4, '#0c1715'); box(hx, hy - 26, 11, 23, 2, '#7be3ff'); }
+  g.restore();
+}
+const RIYA = { skin: '#c98a62', hair: '#2a1a17', longHair: true, top: '#e8718d', topBack: '#b9526c', topFront: '#f0829c', legs: '#31507a', legsBack: '#243d60', shoes: '#f4efe6', phone: true };
+const WORKER = { skin: '#a86c46', hair: '#1e1512', top: '#f08a2c', topBack: '#bf6718', topFront: '#f79a41', legs: '#2c4a63', legsBack: '#203a50', shoes: '#14201f', cap: '#f4c542', vest: true };
+
+// ---------- the truck (faces right; x = how far it is from its parking place) ----------
+function truck(dx, roll, day, lights) {
+  g.save(); g.translate(dx, 0);
+  shadow(955, 652, 190);
+  if (lights > 0) {
+    const beam = g.createLinearGradient(1150, 0, 1480, 0);
+    beam.addColorStop(0, `rgba(255,240,180,${0.42 * lights})`); beam.addColorStop(1, 'rgba(255,240,180,0)');
+    g.fillStyle = beam; g.beginPath(); g.moveTo(1148, 588); g.lineTo(1480, 548); g.lineTo(1480, 660); g.lineTo(1148, 608); g.fill();
+  }
+  const shake = Math.sin(roll * 2.4) * 1.4; g.translate(0, shake);
+  g.fillStyle = '#d99a2e'; g.beginPath(); g.moveTo(770, 448); g.lineTo(812, 420); g.lineTo(812, 622); g.lineTo(782, 622); g.lineTo(758, 560); g.closePath(); g.fill();
+  box(774, 466, 34, 84, 8, '#152421');
+  const tank = g.createLinearGradient(0, 400, 0, 622); tank.addColorStop(0, '#ffd067'); tank.addColorStop(1, '#eda936');
+  box(806, 404, 236, 218, 18, tank);
+  [862, 920, 978].forEach((x) => limb(x, 418, x, 606, 4, 'rgba(120,72,0,.16)'));
+  box(826, 470, 198, 58, 12, '#1f7a4d'); label('TEAM ALPHA', 925, 500, 25, '#ffffff', 800, 'center');
+  label('♻', 925, 438, 36, '#1f7a4d', 700, 'center'); label('CleanTrack', 925, 566, 23, '#6a4708', 700, 'center');
+  g.fillStyle = '#2fa568'; g.beginPath(); g.moveTo(1050, 452); g.lineTo(1112, 452); g.lineTo(1150, 530); g.lineTo(1152, 622); g.lineTo(1050, 622); g.closePath(); g.fill();
+  g.fillStyle = mixColor('#a9e6ee', '#e4fbff', day); g.beginPath(); g.moveTo(1066, 468); g.lineTo(1104, 468); g.lineTo(1132, 530); g.lineTo(1066, 530); g.closePath(); g.fill();
+  disc(1090, 508, 13, '#a86c46'); box(1077, 490, 26, 11, 5, '#f4c542');
+  box(1136, 584, 18, 18, 5, '#fff2b8'); box(774, 604, 380, 14, 5, '#182a26');
+  box(1066, 434, 26, 14, 5, Math.sin(roll * 5 + dx) > 0 ? '#ffb02e' : '#b26d12');
+  g.translate(0, -shake);
+  [842, 900, 1100].forEach((x) => {
+    disc(x, 620, 31, '#101b19'); disc(x, 620, 16, '#a9bab2');
+    for (let i = 0; i < 5; i++) { const a = roll + i * 1.2566; disc(x + Math.cos(a) * 9, 620 + Math.sin(a) * 9, 3, '#3c4b46'); }
+  });
+  g.restore();
+}
+
+// ---------- pictures that float over the street ----------
+function photoCard(x, y, s, a) {
+  g.save(); g.globalAlpha *= a; g.translate(x, y); g.scale(s, s); g.rotate(-0.06);
+  g.shadowColor = 'rgba(0,0,0,.4)'; g.shadowBlur = 26; box(-92, -76, 184, 152, 12, '#ffffff'); g.shadowBlur = 0;
+  box(-80, -64, 160, 106, 6, '#9fc7b4'); g.fillStyle = '#7d958b'; g.fillRect(-80, 18, 160, 24);
+  g.save(); g.beginPath(); g.rect(-80, -64, 160, 106); g.clip();
+  bag(-14, -18, 15, '#4a5350'); bag(14, -21, 17, '#3c4442'); box(-29, -10, 58, 46, 5, '#278f59'); bag(-48, 26, 15, '#454d4b'); bag(48, 26, 15, '#3c4442'); g.restore();
+  label('Sector 12', 0, 59, 19, '#1d3d30', 700, 'center'); g.restore();
+}
+function pin(x, y, s) {
+  if (s <= 0) return; g.save(); g.translate(x, y); g.scale(s, s);
+  g.beginPath(); g.moveTo(0, 0); g.bezierCurveTo(-12, -24, -35, -38, -35, -64); g.arc(0, -64, 35, Math.PI, 0); g.bezierCurveTo(35, -38, 12, -24, 0, 0);
+  g.fillStyle = '#6fb0ff'; g.fill(); disc(0, -64, 14, '#ffffff'); g.restore();
+}
+function toast(text, icon, color, k, y = 66) {
+  if (k <= 0) return; g.save(); g.globalAlpha *= clamp(k * 1.4);
+  g.font = `700 32px ${FONT}`; const w = g.measureText(text).width + 116;
+  g.translate(W / 2, y - (1 - pop(k)) * 90); g.shadowColor = 'rgba(0,0,0,.45)'; g.shadowBlur = 30;
+  box(-w / 2, -37, w, 74, 37, '#0f2019'); g.shadowBlur = 0; box(-w / 2, -37, w, 74, 37, null, 'rgba(255,255,255,.16)');
+  disc(-w / 2 + 44, 0, 23, color); label(icon, -w / 2 + 44, 1, 26, '#06210f', 800, 'center'); label(text, -w / 2 + 82, 0, 32, '#f0fff7', 700); g.restore();
+}
+function arrow(x, y, press) {
+  g.save(); g.translate(x, y); g.scale(1 - press * 0.16, 1 - press * 0.16);
+  g.beginPath(); g.moveTo(0, 0); g.lineTo(0, 43); g.lineTo(11, 33); g.lineTo(19, 50); g.lineTo(27, 46); g.lineTo(19, 30); g.lineTo(33, 30); g.closePath();
+  g.fillStyle = '#ffffff'; g.fill(); g.strokeStyle = '#0a1a14'; g.lineWidth = 3; g.lineJoin = 'round'; g.stroke(); g.restore();
+  if (press > 0) { g.beginPath(); g.arc(x, y, 12 + (1 - press) * 34, 0, 7); g.strokeStyle = `rgba(63,216,138,${press})`; g.lineWidth = 4; g.stroke(); }
+}
+const click = (t, at) => t < at ? 0 : 1 - part(t, at, at + 0.45);
+function dashboard(t) {
+  const k = out(part(t, 5.0, 5.7)) * (1 - smooth(part(t, 9.4, 10.0))); if (k <= 0) return;
+  g.fillStyle = `rgba(4,14,10,${0.55 * k})`; g.fillRect(0, 0, W, H);
+  g.save(); g.translate(0, (1 - k) * 640);
+  g.shadowColor = 'rgba(0,0,0,.6)'; g.shadowBlur = 60; box(160, 56, 880, 560, 24, '#10221a'); g.shadowBlur = 0; box(160, 56, 880, 560, 24, null, 'rgba(255,255,255,.14)');
+  box(160, 56, 880, 66, [24, 24, 0, 0], '#173026'); ['#ff7b7b', '#f4b74a', '#3fd88a'].forEach((c, i) => disc(196 + i * 28, 89, 9, c));
+  label('Admin dashboard', 600, 90, 30, '#e9f3ee', 800, 'center');
+  const filtered = t > 6.55, chip = filtered ? 1 : 0;
+  box(196, 146, 170, 54, 27, chip ? '#1a352a' : '#3fd88a'); label('All areas', 281, 174, 25, chip ? '#9bb3a6' : '#06210f', 700, 'center');
+  box(384, 146, 180, 54, 27, chip ? '#3fd88a' : '#1a352a'); label('Sector 12', 474, 174, 25, chip ? '#06210f' : '#9bb3a6', 700, 'center');
+  // two older rows fade when the list is filtered; the new report drops in on top
+  const fade = part(t, 6.6, 7.0), drop = out(part(t, 7.0, 7.6)), seen = part(t, 8.45, 8.8);
+  [['Plastic by the lake', 'Lake View'], ['Garbage truck missed', 'Green Park']].forEach(([a, b], i) => {
+    if (fade >= 1) return; g.save(); g.globalAlpha *= 1 - fade; const y = 224 + i * 124 + fade * 60;
+    box(196, y, 808, 106, 16, '#16291f'); box(216, y + 18, 70, 70, 12, '#28473a'); label(a, 312, y + 38, 30, '#e9f3ee', 700); label(b, 312, y + 74, 24, '#9bb3a6', 500); g.restore();
+  });
+  if (drop > 0) {
+    const y = mix(120, 224, drop); g.save(); g.globalAlpha *= drop;
+    box(196, y, 808, 138, 18, mixColor('#1b3a2b', '#1f4a35', Math.abs(Math.sin(t * 3)) * (1 - seen)), '#3fd88a', 3);
+    box(216, y + 20, 112, 98, 12, '#9fc7b4'); g.save(); g.beginPath(); g.roundRect(216, y + 20, 112, 98, 12); g.clip();
+    bag(260, y + 58, 13, '#4a5350'); bag(284, y + 56, 14, '#3c4442'); box(248, y + 64, 48, 44, 4, '#278f59'); bag(234, y + 100, 13, '#454d4b'); bag(312, y + 100, 13, '#3c4442'); g.restore();
+    label('Overflowing bin', 352, y + 46, 35, '#ffffff', 800); label('Sector 12 · reported by Riya', 352, y + 92, 26, '#b5cbbf', 500);
+    const c = seen > 0.5; box(806, y + 43, 176, 52, 26, c ? '#3fd88a' : '#26466c'); label(c ? 'Reviewed' : 'New', 894, y + 70, 27, c ? '#06210f' : '#9cc9ff', 800, 'center'); g.restore();
+    const b = part(t, 7.6, 8.0); g.save(); g.globalAlpha *= b; label('1 new report in Sector 12', 600, 430, 28, '#9bb3a6', 500, 'center');
+    box(430, 480, 340, 78, 18, t > 8.9 ? '#2bb571' : '#3fd88a'); label('Assign a team', 600, 520, 33, '#06210f', 800, 'center'); g.restore();
+  }
+  // the mouse pointer: filter, then the new row, then the button
+  let x = mix(860, 474, smooth(part(t, 5.7, 6.4))), y = mix(560, 176, smooth(part(t, 5.7, 6.4)));
+  x = mix(x, 700, smooth(part(t, 7.6, 8.25))); y = mix(y, 300, smooth(part(t, 7.6, 8.25)));
+  x = mix(x, 640, smooth(part(t, 8.55, 8.85))); y = mix(y, 524, smooth(part(t, 8.55, 8.85)));
+  arrow(x, y, Math.max(click(t, 6.5), click(t, 8.4), click(t, 8.95))); g.restore();
+}
+function sparkles(t) {
+  for (let i = 0; i < 16; i++) {
+    const at = 16.9 + i * 0.11, k = part(t, at, at + 1.0); if (k <= 0 || k >= 1) continue;
+    const x = BIN.x - 190 + rand(i + 7) * 380, y = BIN.y - 10 - rand(i + 70) * 220 - k * 24, s = Math.sin(k * Math.PI) * (12 + rand(i) * 15);
+    g.save(); g.translate(x, y); g.rotate(k * 1.2); g.fillStyle = i % 3 ? '#ffffff' : '#5ff0a4'; g.beginPath();
+    for (let j = 0; j < 8; j++) { const r = j % 2 ? s * 0.28 : s, a = j * Math.PI / 4; g[j ? 'lineTo' : 'moveTo'](Math.cos(a) * r, Math.sin(a) * r); }
+    g.fill(); g.restore();
+  }
+}
+
+// ---------- one picture of the film ----------
+function scene(t) {
+  const day = smooth(part(t, 16.4, 18.4));
+  backdrop(t, day); lamp(236, day);
+  // step 1: Riya walks in, takes a photo, sends it
+  bin(t);
+  const inX = mix(-80, 392, part(t, 0.1, 2.1));
+  const awayX = mix(392, -110, part(t, 5.6, 8.4)), riyaX = t < 5.6 ? inX : awayX;
+  if (t < 8.4) person(riyaX, 578, { ...RIYA, walk: t, walking: t < 2.1 || t > 5.6, dir: t > 5.6 ? -1 : 1, arm: smooth(part(t, 2.1, 2.5)) * (1 - smooth(part(t, 4.6, 5.0))) });
+  const sent = smooth(part(t, 3.7, 4.6));
+  if (t > 2.85 && t < 4.6) photoCard(mix(470, 1010, sent), mix(300, 90, sent) - Math.sin(sent * Math.PI) * 60, pop(part(t, 2.85, 3.3)) * mix(1, 0.25, sent), 1 - part(t, 4.4, 4.6));
+  const flash = t > 2.65 ? 1 - part(t, 2.65, 2.95) : 0;
+  pin(BIN.x, BIN.y - 232 - (1 - out(part(t, 4.3, 4.8))) * 160 + Math.sin(t * 3) * 6, clamp(part(t, 4.3, 4.5)) * (1 - part(t, 15.2, 15.5)));
+  // step 3: the truck and the crew
+  const arrive = out(part(t, 10.5, 12.8)), leave = Math.pow(part(t, 17.2, 18.9), 2);
+  const dx = mix(-1240, 0, arrive) + leave * 560;
+  if (t > 10.4 && t < 19.3) {
+    const wx = t < 13.6 ? mix(800, 724, part(t, 12.9, 13.6)) : mix(724, 806, part(t, 16.6, 17.15));
+    if (t > 12.9 && t < 17.15) {
+      const throwing = BAGS.some((b) => t > b.at - 0.12 && t < b.at + 0.22);
+      person(wx, 600, { ...WORKER, walk: t, walking: t < 13.6 || t > 16.6, dir: t < 14.1 ? -1 : 1, arm: throwing ? 1 : 0.15 });
+    }
+    truck(dx, (dx + 1240) / 31, day, (1 - day) * part(t, 10.4, 10.8));
+    flyingBags(t, 0);
+  }
+  sparkles(t);
+  // messages
+  toast('Report sent', '✓', '#6fb0ff', part(t, 4.25, 4.6) * (1 - part(t, 4.85, 5.05)));
+  dashboard(t);
+  toast('Team Alpha assigned', '✓', '#f4b74a', part(t, 10.05, 10.45) * (1 - part(t, 13.6, 13.9)));
+  toast('Resolved', '✓', '#3fd88a', part(t, 17.3, 17.7) * (1 - part(t, 19.3, 19.6)));
+  if (flash > 0) {   // a soft camera flash at the phone, not over the whole picture
+    const glow = g.createRadialGradient(444, 420, 4, 444, 420, 210);
+    glow.addColorStop(0, `rgba(255,255,255,${0.9 * flash})`); glow.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = glow; g.fillRect(234, 210, 420, 420);
+  }
+}
+const start = document.createElement('canvas'); start.width = W; start.height = H;
+function draw(t) {
+  g = canvas.getContext('2d'); scene(t);
+  // the last 0.6 seconds melt into the first picture, so the loop has no jump
+  const k = smooth(part(t, 19.4, LENGTH));
+  if (k > 0) {
+    g = start.getContext('2d'); scene(0); g = canvas.getContext('2d');
+    g.globalAlpha = k; g.drawImage(start, 0, 0); g.globalAlpha = 1;
+  }
+}
+if (!location.hash.includes('render')) { const t0 = performance.now(); (function play() { draw(((performance.now() - t0) / 1000) % LENGTH); requestAnimationFrame(play); })(); }
+</script>
