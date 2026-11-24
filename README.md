@@ -2,6 +2,8 @@
 
 **CodesClash 2026 · Preliminary Round · Problem Statement 01: Waste Management System**
 
+**Live site:** https://cleantrack-6qha.onrender.com (free hosting: the first visit can take about a minute to wake it up)
+
 Residents report waste problems (overflowing bins, litter, plastic, e-waste, dumping) with a category, area, location and an optional photo.
 An admin (the city's collection team) sees every report, filters them, assigns a team and updates the status.
 Residents follow each report from **Submitted → In Progress → Resolved**, with a full history.
@@ -120,6 +122,7 @@ cleantrack/
 - **Notifications are simulated:** when an admin updates a complaint, the server only *prints* "[SIMULATED NOTIFICATION]" in the terminal. No SMS or email is sent.
 - **No map view inside the site:** location is a text landmark plus an area, and optionally a Google Maps link that opens in a new tab. No Google API is used. Instead of a map we show an area-wise summary table.
 - **Sessions are kept in server memory:** restarting the server logs everyone out.
+- **The live site resets:** it runs on Render's free plan, which does not keep files. When it sleeps, restarts or updates, new reports, photos and accounts are lost and the sample data comes back.
 - **The bin photo** is a sample picture found through Google Images (original owner not identified), used only for the demo.
 
 ## Future improvements
