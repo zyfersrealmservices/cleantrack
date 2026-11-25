@@ -70,7 +70,7 @@ Both are locked until you set their passwords with `npm run set-passwords` (type
 - **Database:** SQLite through Node's built-in `node:sqlite` module (`db.js`), stored in `data/cleantrack.db`
 - **Security** (`security.js`): scrypt password hashing, parameterised SQL (`?` placeholders), HTML escaping plus a strict Content-Security-Policy, security headers, HttpOnly session cookies that expire, rate limits, checks against requests from other websites, server-side role checks on pages, API and photos, photos checked by their content, and only listed files can be opened. `npm test` attacks a throwaway copy to check all of this
 - **My work (Ayush Bose):** research, choosing the problem and the features, the design direction, trying every version and giving feedback.
-- **AI assistance:** Claude (Anthropic) was used as a coding assistant, for the code, security tests, animation, documents and the first draft of the slides.
+- **AI assistance:** Claude (Anthropic) was used as a coding assistant, for the code, security tests, animation, documents and the first draft of the slides. The voice in the demo video is made with ElevenLabs (elevenlabs.io).
 
 ## Settings (environment variables, all optional)
 
